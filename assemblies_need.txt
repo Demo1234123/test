@@ -1,0 +1,9 @@
+https://swifter.embl.de/~fullam/spire/compiled/ALOHA_BATS_marine_pelagic_spire_v1_assemblies.tar
+https://swifter.embl.de/~fullam/spire/compiled/Wang_2022_elderly_osteoporosis_spire_v1_assemblies.tar
+https://swifter.embl.de/~fullam/spire/compiled/Cao_2023_goat_spire_v1_assemblies.tar
+https://swifter.embl.de/~fullam/spire/compiled/McKay_2021_coalbed_spire_v1_assemblies.tar
+https://swifter.embl.de/~fullam/spire/compiled/Panwar_2020_lake_Antarctica_spire_v1_assemblies.tar
+https://swifter.embl.de/~fullam/spire/compiled/Aylward_2012_ant_fungus_spire_v1_assemblies.tar
+https://swifter.embl.de/~fullam/spire/compiled/Liang_2020_adenomatous_polyps_spire_v1_assemblies.tar
+https://swifter.embl.de/~fullam/spire/compiled/PRJNA309119_Eurytemora_copepod_water_spire_v1_assemblies.tar
+https://swifter.embl.de/~fullam/spire/compiled/Zhong_2023_virus_Arctic_spire_v1_assemblies.tar
