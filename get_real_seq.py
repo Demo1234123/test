@@ -6,9 +6,10 @@ import gzip
 import shutil
 from Bio import SeqIO
 from tqdm import tqdm
+from multiprocessing import Pool, cpu_count
 
 
-def tar_gz(ls):
+def process_tar(ls):
     # 遍历每一个 .tar 文件
     for pro in tqdm(ls):
         if pro.endswith('.tar'):
@@ -58,4 +59,5 @@ if __name__ == '__main__':
     base_dir = 'spire'
     # 列出目录中的所有文件
     protein_ls = os.listdir(base_dir)
-    tar_gz(protein_ls)
+    with Pool(cpu_count()) as pool:
+        list(tqdm(pool.imap(process_tar, protein_ls), total=len(protein_ls)))
