@@ -46,7 +46,7 @@ def get_seq(seq_pa):
         if seq_length <= 50:
             filtered_sequences.append(seq_record)
         elif seq_record.seq.startswith("*") or seq_record.seq.endswith("*"):
-            clean_seq_length = len(seq_record.seq.replace('*', ''))
+            clean_seq_length = len(str(seq_record.seq).replace('*', ''))
             if clean_seq_length <= 50:
                 filtered_sequences.append(seq_record)
     with open(seq_pa, "w") as output_handle:
@@ -55,7 +55,7 @@ def get_seq(seq_pa):
 
 if __name__ == '__main__':
     # 目标目录
-    base_dir = 'down'
+    base_dir = 'spire'
     # 列出目录中的所有文件
     protein_ls = os.listdir(base_dir)
     tar_gz(protein_ls)
