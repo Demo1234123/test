@@ -1,10 +1,12 @@
 #!/user/bin/env python3
 # -*- coding: utf-8 -*-
+import glob
 import os
 import tarfile
 import gzip
 import shutil
 from Bio import SeqIO
+import pandas as pd
 from tqdm import tqdm
 from multiprocessing import Pool, cpu_count
 
@@ -44,22 +46,56 @@ def get_seq(seq_pa):
     # 筛选长度小于等于50的序列
     filtered_sequences = []
     for seq_record in sequences:
-        seq_length = len(seq_record.seq)
-        if seq_length <= 50:
-            filtered_sequences.append(seq_record)
-        elif seq_record.seq.startswith("*") or seq_record.seq.endswith("*"):
-            clean_seq_length = len(str(seq_record.seq).replace('*', ''))
+        seq = str(seq_record.seq)
+        # seq_length = len(seq)
+        # if seq_length <= 50 and '*' not in seq:
+        #     filtered_sequences.append(seq)
+        if not ('*' in seq and not seq.startswith("*") and not seq.endswith("*")):
+            seq = seq.replace('*', '')
+            clean_seq_length = len(seq)
             if clean_seq_length <= 50:
-                filtered_sequences.append(seq_record)
+                filtered_sequences.append(seq)
     with open(seq_pa, "w") as output_handle:
-        SeqIO.write(filtered_sequences, output_handle, "fasta")
+        for seq in filtered_sequences:
+            output_handle.write(seq + "\n")
+
+
+def filter_sequences(sequence):
+    seq_length = len(sequence)
+    if seq_length <= 50:
+        return True
+    elif sequence.startswith("*") or sequence.endswith("*"):
+        clean_seq_length = len(sequence.replace('*', ''))
+        if clean_seq_length <= 50:
+            return True
+    return False
+
+
+def pro_txt(pa):
+    df = pd.read_csv(pa, sep='\t')
+    if 'orf_sequence' in df.columns.tolist():
+        df['orf_sequence'] = df['orf_sequence'].astype(str)
+        df['is_filtered'] = df['orf_sequence'].apply(filter_sequences)
+    else:
+        df['Protein or peptide sequence'] = df['Protein or peptide sequence'].astype(str)
+        df['is_filtered'] = df['Protein or peptide sequence'].apply(filter_sequences)
+    filtered_df = df[df['is_filtered']]
+    b_name = os.path.basename(pa)
+    filtered_df.to_csv(f'./RNA/pro/{b_name}', sep='\t', index=False)
 
 
 if __name__ == '__main__':
     # 目标目录
-    base_dir = 'down'
+    base_dir = 'spire'
     # 列出目录中的所有文件
     protein_ls = os.listdir(base_dir)
+    # os.makedirs(os.path.join(base_dir, 'pro'), exist_ok=True)
+    # protein_ls = glob.glob(os.path.join(base_dir, '**/*.txt'), recursive=True)
+    # pro_txt('pep.info.ZMA.txt')
+    # for pa in protein_ls:
+    #     get_seq(pa)
+    #     pro_txt(pa)
+    #     print(pa)
     with Pool(cpu_count()) as pool:
         args = [(pro, base_dir) for pro in protein_ls]
         list(tqdm(pool.imap(process_tar, args), total=len(protein_ls)))
