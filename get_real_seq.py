@@ -20,19 +20,20 @@ def process_tar(args):
     # for pro in ls:
     if pro.endswith('.tar'):
         tar_path = os.path.join(base_dir, pro)
-        try:
-            # 创建一个目录用于解压 .tar 文件
-            extract_dir = os.path.join(base_dir, pro[:-4])
-            # if not os.path.exists(extract_dir):
-            os.makedirs(extract_dir, exist_ok=True)
 
-            # 解压 .tar 文件
-            with tarfile.open(tar_path, "r:") as tar:
-                tar.extractall(path=extract_dir)
+        # 创建一个目录用于解压 .tar 文件
+        extract_dir = os.path.join(base_dir, pro[:-4])
+        # if not os.path.exists(extract_dir):
+        os.makedirs(extract_dir, exist_ok=True)
 
-            # 遍历解压后的目录，查找 .gz 文件并解压
-            for root, dirs, files in os.walk(extract_dir):
-                for file in files:
+        # 解压 .tar 文件
+        with tarfile.open(tar_path, "r:") as tar:
+            tar.extractall(path=extract_dir)
+
+        # 遍历解压后的目录，查找 .gz 文件并解压
+        for root, dirs, files in os.walk(extract_dir):
+            for file in files:
+                try:
                     if file.endswith('.gz'):
                         gz_path = os.path.join(root, file)
                         extract_path = os.path.join(root, file[:-3])  # 去掉 .gz 后缀
@@ -42,8 +43,8 @@ def process_tar(args):
                                 shutil.copyfileobj(f_in, f_out)
                         # 可选择删除原始的 .gz 文件
                         os.remove(gz_path)
-        except Exception as e:
-            print(e)
+                except Exception as e:
+                    print(e)
             # out_path = extract_path + 'a'
             # get_seq(extract_path)
             # subprocess.run(['prodigal', '-i', extract_path, '-a', out_path])
