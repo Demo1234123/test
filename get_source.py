@@ -5,7 +5,7 @@ from tqdm import tqdm
 import pandas as pd
 import glob
 from Bio import SeqIO
-from multiprocessing import Pool
+from multiprocessing import Pool, cpu_count
 
 
 def insert_char(string, char, index):
@@ -75,14 +75,14 @@ def pro_fa_seq(seq_pa):
     # # 筛选长度小于等于50的序列
     # filtered_sequences = []
     # for seq_record in sequences:
-        # seq_id = str(seq_record.id)
-        # protein_id = map_source(seq_id)
-        # seq = str(seq_record.seq)
-        # if not ('*' in seq and not seq.startswith("*") and not seq.endswith("*")):
-        #     seq = seq.replace('*', '')
-        #     clean_seq_length = len(seq)
-        #     if clean_seq_length <= 50:
-        #         filtered_sequences.append([seq, protein_id])
+    # seq_id = str(seq_record.id)
+    # protein_id = map_source(seq_id)
+    # seq = str(seq_record.seq)
+    # if not ('*' in seq and not seq.startswith("*") and not seq.endswith("*")):
+    #     seq = seq.replace('*', '')
+    #     clean_seq_length = len(seq)
+    #     if clean_seq_length <= 50:
+    #         filtered_sequences.append([seq, protein_id])
     with open(seq_pa, "r") as output_handle:
         seq_ls = output_handle.read().split()
     filtered_sequences = [[seq, protein_id] for seq in seq_ls]
@@ -92,8 +92,8 @@ def pro_fa_seq(seq_pa):
 def append_to_csv(data):
     # global first_file
     df_sub = pd.DataFrame(data)
-    # df_sub.drop_duplicates(subset=)
-    df_sub.to_csv('./merge_spire_data.tsv', sep='\t', mode='a', index=False)
+    df_sub.drop_duplicates(subset=[0], inplace=True)
+    df_sub.to_csv('./merge_spire1_data.tsv', sep='\t', mode='a', index=False)
 
 
 def merge_lncpep():
@@ -188,9 +188,13 @@ if __name__ == '__main__':
     # real_merge()
     # merge_lncpep()
     # pro_spire3()
+    # ls = glob.glob('./KPS/**/*.faa', recursive=True) + glob.glob('./DNA-derived/**/*.faa', recursive=True)
     ls = glob.glob('./down_data/**/*.faa', recursive=True)
-    for pa in tqdm(ls):
-        pro_fa_seq(pa)
+    with Pool(cpu_count()) as pool:
+        # args = [(pro, base_dir) for pro in protein_ls]
+        list(tqdm(pool.imap(pro_fa_seq, ls), total=len(ls)))
+    # for pa in tqdm(ls):
+    #     pro_fa_seq(pa)
     # with open('./need_pro_spire.txt', 'a', encoding='utf-8') as f:
     #     seq_da = f.read().split()
     # print(seq_da[-1], len(seq_da))
