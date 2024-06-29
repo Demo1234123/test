@@ -127,7 +127,7 @@ def pro_spire(row):
     elif row['domain']:
         return row['domain']
     else:
-        return None
+        return 'unknown'
 
 
 def real_merge():
@@ -150,40 +150,39 @@ def pro_spire2(args):
     # for i, df1 in enumerate(reader):
     #     if i < 861:
     #         continue
-    # df1, df2, chunk_index = args
-    df1, df2 = args
+    df1, df2, chunk_index = args
+    # df1, df2 = args
     print(df1.columns)
     df1.rename(columns={'0': 'Sequence', '1': 'derived_from_sample'}, inplace=True)
     df1.dropna(subset=['Sequence'], inplace=True)
     df1.drop_duplicates(subset=['Sequence'], inplace=True)
     real_df = pd.merge(df1, df2, on=['derived_from_sample'], how='left')
     real_df['Length'] = real_df['Sequence'].str.len()
-    # real_df[['Source', 'Sequence', 'Length']].to_csv(f'./merge/spire/spire_data{chunk_index}.tsv', sep='\t', index=False)
+    real_df[['Source', 'Sequence', 'Length']].to_csv(f'./spire_sub/spire_data{chunk_index}.tsv', sep='\t', index=False)
     del real_df, df1
 
 
 def pro_spire3():
-    reader = pd.read_csv('./merge_spire_data.tsv', sep='\t', chunksize=2000000, dtype=str)
+    reader = pd.read_csv('./merge_spire1_data.tsv', sep='\t', chunksize=20000000, dtype={'Source': str})
     df2 = pd.read_csv('./spire_v1_source.tsv', sep='\t')
     df2['Source'] = df2.apply(lambda x: pro_spire(x), axis=1)
-    real_df1 = pd.DataFrame()
-    for df1 in reader:
-        print(df1.columns.tolist())
-        df1.rename(columns={'0': 'Sequence', '1': 'derived_from_sample'}, inplace=True)
-        df1.dropna(subset=['Sequence'], inplace=True)
-        df1.drop_duplicates(subset=['Sequence'], inplace=True)
-        real_df = pd.merge(df1, df2, on=['derived_from_sample'], how='left')
-        real_df['Length'] = real_df['Sequence'].str.len()
-        real_df = real_df[['Source', 'Sequence', 'Length']]
-        real_df1 = pd.concat([real_df1, real_df], ignore_index=True)
-        real_df1.drop_duplicates(subset=['Sequence'], inplace=True)
-        del df1, real_df
-        # with Pool(cpu_count()) as pool:
-        #     args = [(chunk, df2, i) for i,chunk in enumerate(reader)]
-        #     list(tqdm(pool.imap(pro_spire2, ls), total=len(ls)))
+    # real_df1 = pd.DataFrame()
+    # for i, df1 in enumerate(reader):
+    #     df1.rename(columns={'0': 'Sequence', '1': 'derived_from_sample'}, inplace=True)
+    #     df1.dropna(subset=['Sequence'], inplace=True)
+    #     df1.drop_duplicates(subset=['Sequence'], inplace=True)
+    #     real_df = pd.merge(df1, df2, on=['derived_from_sample'], how='left')
+    #     real_df['Length'] = real_df['Sequence'].str.len()
+    #     real_df = real_df[['Source', 'Sequence', 'Length']]
+    #     real_df1 = pd.concat([real_df1, real_df], ignore_index=True)
+    #     real_df1.drop_duplicates(subset=['Sequence'], inplace=True)
+    #     del df1, real_df
+    with Pool(cpu_count()) as pool:
+        args = [(chunk, df2, i) for i, chunk in enumerate(reader)]
+        list(tqdm(pool.imap(pro_spire2, args), total=len(args)))
 
-        break
-    real_df1.to_csv('duplicate_spire1_data.tsv', sep='\t', index=False)
+
+# real_df1.to_csv('duplicate_spire1_data.tsv', sep='\t', index=False)
 
 
 def duplicate_spire(pa):
